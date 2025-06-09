@@ -1,7 +1,7 @@
 import { env } from '$env/dynamic/private';
 
 // Database Configuration
-export const DB_PATH = env.DB_PATH || 'src/lib/database/jkuis.db';
+export const DB_PATH = 'src/lib/database/jkuis.db';
 
 // API Configuration
 export const API_URL = env.API_URL || 'http://localhost:5173';

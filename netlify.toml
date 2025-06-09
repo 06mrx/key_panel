@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  DB_PATH = ".data/jkuis.db"
+  DB_PATH = "src/lib/database/jkuis.db"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs" 
