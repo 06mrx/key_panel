@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  DB_PATH = ".data/jkuis.db"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs" 

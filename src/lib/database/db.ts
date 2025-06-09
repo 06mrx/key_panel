@@ -1,8 +1,17 @@
 import Database from 'better-sqlite3';
 import bcrypt from 'bcrypt';
 import { DB_PATH } from '$lib/config/env';
+import fs from 'fs';
+import path from 'path';
 
 console.log('Initializing database...');
+
+// Ensure database directory exists
+const dbDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dbDir)) {
+    console.log(`Creating database directory: ${dbDir}`);
+    fs.mkdirSync(dbDir, { recursive: true });
+}
 
 // Inisialisasi database
 const db = new Database(DB_PATH, { verbose: console.log });
