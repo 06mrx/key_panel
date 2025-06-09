@@ -4,22 +4,27 @@
     
     const slides = [
         {
-            image: '/tutorial/favicon.png',
+            image: '/tutorial/1.jpeg',
             title: 'Izinkan Overlay',
             description: 'Izinkan aplikasi untuk berjalan di atas aplikasi lain untuk membantu menyelesaikan soal'
         },
         {
-            image: '/tutorial/favicon.png',
+            image: '/tutorial/2.jpeg',
+            title: 'Klik Tombol Mulai',
+            description: 'Klik tombol mulai untuk memulai penggunaan kuis helper'
+        },
+        {
+            image: '/tutorial/3.jpeg',
             title: 'Atur Posisi',
             description: 'Sesuaikan posisi kotak merah dengan posisi soal yang ingin diselesaikan'
         },
         {
-            image: '/tutorial/favicon.png',
-            title: 'Klik Tombol',
+            image: '/tutorial/4.jpeg',
+            title: 'Klik Tombol Helper',
             description: 'Klik tombol untuk mendapatkan jawaban dari soal yang ditampilkan'
         },
         {
-            image: '/tutorial/favicon.png',
+            image: '/tutorial/5.jpeg',
             title: 'Stop Helper',
             description: 'Klik tombol stop untuk menghentikan penggunaan kuis helper'
         }
@@ -121,55 +126,71 @@
         <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">
             Cara Penggunaan
         </h2>
-        <div class="relative max-w-4xl mx-auto mb-12">
+        <div class="relative max-w-[500px] mx-auto mb-12">
             <div 
-                class="relative w-full h-0 pb-[56.25%] bg-sky-200 rounded-xl overflow-hidden shadow-lg cursor-grab active:cursor-grabbing"
-                on:mousedown|preventDefault={handleDragStart}
-                on:touchstart|preventDefault={handleDragStart}
+                class="relative w-full rounded-xl overflow-hidden shadow-lg cursor-grab active:cursor-grabbing"
             >
-                <!-- Slides -->
-                {#each slides as slide, i}
-                    {#if i === currentSlide}
-                        <div 
-                            class="absolute inset-0 select-none"
-                            in:fly={{ x: 100 * direction, duration: 300 }}
-                            out:fly={{ x: -100 * direction, duration: 300 }}
-                        >
-                            <img
-                                src={slide.image}
-                                alt={slide.title}
-                                class="w-full h-full object-cover"
-                                draggable="false"
-                            />
-                            <div class="absolute bottom-0 inset-x-0 bg-black/40 p-6 pointer-events-none">
-                                <h3 class="text-white text-xl font-semibold">{slide.title}</h3>
-                                <p class="text-white/90">{slide.description}</p>
+                <div 
+                    class="relative w-full h-0 pb-[133.33%] bg-sky-200 overflow-hidden"
+                    on:mousedown|preventDefault={handleDragStart}
+                    on:touchstart|preventDefault={handleDragStart}
+                >
+                    <!-- Slides -->
+                    {#each slides as slide, i}
+                        {#if i === currentSlide}
+                            <div 
+                                class="absolute inset-0 select-none"
+                                in:fly={{ x: 100 * direction, duration: 300 }}
+                                out:fly={{ x: -100 * direction, duration: 300 }}
+                            >
+                                <img
+                                    src={slide.image}
+                                    alt={slide.title}
+                                    class="w-full h-full object-contain bg-sky-200"
+                                    draggable="false"
+                                />
                             </div>
-                        </div>
-                    {/if}
-                {/each}
+                        {/if}
+                    {/each}
 
-                <!-- Navigation Buttons -->
-                <button
-                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
-                    on:click={prevSlide}
-                >
-                    ←
-                </button>
-                <button
-                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
-                    on:click={nextSlide}
-                >
-                    →
-                </button>
+                    <!-- Navigation Buttons -->
+                    <button
+                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
+                        on:click={prevSlide}
+                    >
+                        ←
+                    </button>
+                    <button
+                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
+                        on:click={nextSlide}
+                    >
+                        →
+                    </button>
 
-                <!-- Dots Navigation -->
-                <div class="absolute bottom-20 left-1/2 -translate-x-1/2 flex space-x-2">
-                    {#each slides as _, i}
-                        <button
-                            class="w-2.5 h-2.5 rounded-full transition-colors {i === currentSlide ? 'bg-white' : 'bg-white/50 hover:bg-white/70'}"
-                            on:click={() => goToSlide(i)}
-                        />
+                    <!-- Dots Navigation -->
+                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
+                        {#each slides as _, i}
+                            <button
+                                class="w-2.5 h-2.5 rounded-full transition-colors {i === currentSlide ? 'bg-sky-500' : 'bg-sky-200 hover:bg-sky-300'}"
+                                on:click={() => goToSlide(i)}
+                            />
+                        {/each}
+                    </div>
+                </div>
+
+                <!-- Title and Description -->
+                <div class="p-4 bg-white">
+                    {#each slides as slide, i}
+                        {#if i === currentSlide}
+                            <div 
+                                class="select-none"
+                                in:fly={{ y: 20, duration: 300, delay: 200 }}
+                                out:fly={{ y: -20, duration: 200 }}
+                            >
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">{slide.title}</h3>
+                                <p class="text-gray-600">{slide.description}</p>
+                            </div>
+                        {/if}
                     {/each}
                 </div>
             </div>
