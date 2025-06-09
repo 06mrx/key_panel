@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
-import { DB_PATH } from '$lib/config/env';
+// import { DB_PATH } from '$lib/config/env';
 
-const db = new Database(DB_PATH, { verbose: console.log });
+const db = new Database("src/lib/database/jkuis.db", { verbose: console.log });
 
 // Helper function untuk get single row
 export function getRow(sql: string, params: any[] = []) {

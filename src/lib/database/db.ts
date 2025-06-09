@@ -7,7 +7,7 @@ import path from 'path';
 console.log('Initializing database...');
 
 // Ensure database directory exists
-const dbDir = path.dirname(DB_PATH);
+const dbDir = path.dirname("src/lib/database/jkuis.db");
 if (!fs.existsSync(dbDir)) {
     console.log(`Creating database directory: ${dbDir}`);
     fs.mkdirSync(dbDir, { recursive: true });
