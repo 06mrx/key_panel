@@ -83,6 +83,33 @@
         return info.length > 0 ? info.join(' | ') : 'No device info';
     }
 
+    function getDeviceCount(customer: Customer): string {
+    const devices = customer.devices;
+
+    if (!devices) return '0';
+
+    if (Array.isArray(devices)) {
+        return devices.length.toString();
+    }
+
+    if (typeof devices === 'string') {
+        try {
+            const parsed = JSON.parse(devices);
+            if (Array.isArray(parsed)) {
+                return parsed.length.toString();
+            }
+        } catch {
+            const matches = devices.match(/[a-fA-F0-9]{16}/g);
+            if (matches) {
+                return matches.length.toString();
+            }
+        }
+    }
+
+    return '0';
+}
+
+
     function openAddModal() {
         isNewCustomer = true;
         editingCustomer = {
@@ -236,6 +263,7 @@
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expire At</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Device</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device Info</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Devices</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -250,6 +278,21 @@
                         <td class="px-3 sm:px-6 py-4">
                             <div class="text-xs text-gray-600">
                                 {formatDeviceInfo(customer)}
+                            </div>
+                        </td>
+                        <td class="px-3 sm:px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">
+                                {getDeviceCount(customer)} / {customer.maximum_device}
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                {getDeviceCount(customer) === customer.maximum_device.toString() ? 'Full' : 'Available'}
+                                <br>
+                               <span class="text-wrap max-w-20">
+                                {#each customer.devices as device}
+                                    {device}
+                                    <br>
+                                {/each}
+                               </span>
                             </div>
                         </td>
                         <td class="px-3 sm:px-6 py-4 space-x-2 whitespace-nowrap text-sm">
@@ -276,7 +319,7 @@
                     </tr>
                 {:else}
                     <tr>
-                        <td colspan="5" class="px-3 sm:px-6 py-4 text-sm text-center text-gray-500">
+                        <td colspan="6" class="px-3 sm:px-6 py-4 text-sm text-center text-gray-500">
                             {searchQuery ? 'Tidak ada hasil pencarian' : 'Tidak ada data customer'}
                         </td>
                     </tr>
@@ -435,4 +478,4 @@
         confirmationCallback();
     }}
     onCancel={() => showConfirmation = false}
-/> 
+/>

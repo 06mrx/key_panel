@@ -159,21 +159,21 @@ export const POST: RequestHandler = async ({ request }) => {
                 (!customer.fingerprint || customer.fingerprint === fingerprint)
             );
 
-            if (!deviceInfoMatches) {
-                const message = 'Informasi device tidak sesuai dengan yang terdaftar';
-                await insertRow('failed_customer_auth', {
-                    code,
-                    device_id,
-                    device_name: device_name || null,
-                    os_version: os_version || null,
-                    fingerprint: fingerprint || null,
-                    message
-                });
-                return json({ 
-                    success: false, 
-                    message 
-                }, { status: 401 });
-            }
+            // if (!deviceInfoMatches) {
+            //     const message = 'Informasi device tidak sesuai dengan yang terdaftar';
+            //     await insertRow('failed_customer_auth', {
+            //         code,
+            //         device_id,
+            //         device_name: device_name || null,
+            //         os_version: os_version || null,
+            //         fingerprint: fingerprint || null,
+            //         message
+            //     });
+            //     return json({ 
+            //         success: false, 
+            //         message 
+            //     }, { status: 401 });
+            // }
         }
     }
 

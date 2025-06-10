@@ -136,6 +136,7 @@
                 <tr>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device Info</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                     <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -148,6 +149,10 @@
                             <div class="text-xs text-gray-600">
                                 {formatDeviceInfo(auth)}
                             </div>
+                        </td>
+                        <td class="px-3 sm:px-6 py-4 text-sm text-gray-500">
+                            {auth.message} <br>
+                            {auth.device_id}
                         </td>
                         <td class="px-3 sm:px-6 py-4 text-sm text-gray-500">
                             {new Date(auth.created_at).toLocaleString()}
