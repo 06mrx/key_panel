@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import db from '$lib/database/db';
+import { getRows } from '$lib/config/supabase';
 
 interface Locals {
     user?: {
@@ -9,18 +9,13 @@ interface Locals {
 }
 
 export const GET: RequestHandler = async ({ locals }: { locals: Locals }) => {
-    // Pastikan user sudah login sebagai admin
+    // Ensure user is logged in as admin
     if (!locals.user || locals.user.role !== 'admin') {
         return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const stmt = db.prepare(`
-            SELECT * FROM failed_customer_auth 
-            ORDER BY created_at DESC 
-            LIMIT 100
-        `);
-        const failedAuths = stmt.all();
+        const failedAuths = await getRows('failed_customer_auth', {});
 
         return json({ failedAuths });
     } catch (error) {

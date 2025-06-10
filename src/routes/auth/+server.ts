@@ -1,10 +1,10 @@
-import { json, redirect } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import db, { getRow } from '$lib/server/database';
+import { getRow } from '$lib/config/supabase';
 import bcrypt from 'bcrypt';
 
 interface User {
-    id: number;
+    id: string;
     username: string;
     password: string;
     role: string;
@@ -14,8 +14,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     const { username, password } = await request.json();
 
     try {
-        // Cari user berdasarkan username
-        const user = getRow('SELECT * FROM users WHERE username = ?', [username]) as User | undefined;
+        // Find user by username
+        const user = await getRow('users', { username }) as User | undefined;
 
         if (!user) {
             return json({
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             }, { status: 401 });
         }
 
-        // Verifikasi password
+        // Verify password
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             }, { status: 401 });
         }
 
-        // Verifikasi role
+        // Verify role
         if (user.role !== 'admin') {
             return json({
                 success: false,
@@ -42,8 +42,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             }, { status: 403 });
         }
 
-        // Set session cookie dengan user ID
-        cookies.set('session', user.id.toString(), {
+        // Set session cookie with user UUID
+        cookies.set('session', user.id, {
             path: '/',
             httpOnly: true,
             sameSite: 'strict',
@@ -51,7 +51,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             maxAge: 60 * 60 * 24 // 24 hours
         });
 
-        // Return success response instead of redirect
+        // Return success response
         return json({
             success: true,
             redirect: '/admin'

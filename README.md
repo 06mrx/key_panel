@@ -25,6 +25,9 @@ npm run dev
 npm run dev -- --open
 ```
 
+npm run dev -- --host 192.168.1.5
+
+
 ## Building
 
 To create a production version of your app:

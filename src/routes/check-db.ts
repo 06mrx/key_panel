@@ -1,39 +1,38 @@
-const fs = require('fs').promises;
-const Database = require('better-sqlite3');
-import { DB_PATH } from '$lib/config/env';
+import { supabase } from '$lib/config/supabase';
 
 async function checkDatabase() {
     try {
-        // Check if database file exists
-        const stats = await fs.stat(DB_PATH);
-        console.log('Database file exists:', {
-            size: stats.size,
-            permissions: stats.mode,
-            created: stats.birthtime,
-            modified: stats.mtime
-        });
+        // Test connection
+        const { data: testData, error: testError } = await supabase
+            .from('failed_customer_auth')
+            .insert({
+                code: 'test',
+                device_id: 'test',
+                device_name: 'test',
+                os_version: 'test',
+                fingerprint: 'test',
+                message: 'Test message'
+            })
+            .select()
+            .single();
 
-        // Initialize database connection
-        const db = new Database(DB_PATH, { verbose: console.log });
+        if (testError) {
+            console.error('Test write error:', testError);
+            return;
+        }
 
-        // Try to write a test record
-        const testStmt = db.prepare(`
-            INSERT INTO failed_customer_auth 
-            (code, device_id, device_name, os_version, fingerprint, message)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `);
-        const result = testStmt.run(
-            'test',
-            'test',
-            'test',
-            'test',
-            'test',
-            'Test message'
-        );
-        console.log('Test write successful:', result);
+        console.log('Test write successful:', testData);
 
         // Read all records
-        const records = db.prepare('SELECT * FROM failed_customer_auth').all();
+        const { data: records, error: readError } = await supabase
+            .from('failed_customer_auth')
+            .select('*');
+
+        if (readError) {
+            console.error('Read error:', readError);
+            return;
+        }
+
         console.log('All records:', records);
 
     } catch (error) {

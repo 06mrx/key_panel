@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
-import { getRows } from '$lib/server/database';
+import { getRows } from '$lib/config/supabase';
 
 interface Locals {
     user?: {
@@ -15,17 +15,15 @@ export const load: PageServerLoad = async ({ locals }: { locals: Locals }) => {
     }
 
     try {
-        const failedAuths = getRows(`
-            SELECT * FROM failed_customer_auth 
-            ORDER BY created_at DESC 
-            LIMIT 100
-        `);
+        const failedAuths = await getRows('failed_customer_auth', {});
 
         return {
-            failedAuths
+            failedAuths: failedAuths.sort((a, b) => 
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )
         };
     } catch (err) {
-        console.error('Error fetching failed auth data:', err);
-        throw error(500, 'Internal Server Error');
+        console.error('Error mengambil data failed auth:', err);
+        throw error(500, 'Terjadi kesalahan saat mengambil data failed auth');
     }
 }; 

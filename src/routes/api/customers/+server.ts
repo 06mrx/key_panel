@@ -1,11 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { 
-    getAllCustomers, 
-    addCustomer, 
-    updateCustomer,
-    deleteCustomer 
-} from '$lib/database/db';
+import { getRows, insertRow } from '$lib/config/supabase';
 
 interface Customer {
     id: number;
@@ -22,23 +17,71 @@ interface Customer {
 
 // GET /api/customers - Mendapatkan semua customers
 export const GET: RequestHandler = async () => {
-    const customers = getAllCustomers();
-    return json({ customers });
+    try {
+        const customers = await getRows('customers', {});
+        
+        return json({ 
+            customers: customers.map(customer => ({
+                ...customer,
+                devices: customer.devices ? JSON.parse(customer.devices) : []
+            }))
+        });
+    } catch (error) {
+        console.error('Error mengambil data customers:', error);
+        return json({ error: 'Terjadi kesalahan saat mengambil data customers' }, { status: 500 });
+    }
 };
 
 // POST /api/customers - Menambah customer baru
 export const POST: RequestHandler = async ({ request }) => {
-    const { code, expire_at, maximum_device } = await request.json();
-
-    if (!code) {
-        return json({ error: 'Code harus diisi' }, { status: 400 });
-    }
-
     try {
-        addCustomer(code, expire_at, maximum_device);
-        return json({ success: true });
-    } catch (error) {
-        console.error('Error adding customer:', error);
-        return json({ error: 'Internal server error' }, { status: 500 });
+        const { 
+            code, 
+            expire_at, 
+            maximum_device = 1,
+            device_name = null,
+            os_version = null,
+            fingerprint = null
+        } = await request.json();
+
+        if (!code) {
+            return json(
+                { error: 'Code harus diisi' },
+                { status: 400 }
+            );
+        }
+
+        // Insert customer baru
+        const result = await insertRow('customers', {
+            code,
+            expire_at,
+            maximum_device,
+            devices: '[]',
+            device_name,
+            os_version,
+            fingerprint
+        });
+
+        return json({ 
+            message: 'Customer berhasil ditambahkan',
+            customer: {
+                ...result,
+                devices: []
+            }
+        });
+    } catch (error: any) {
+        console.error('Error menambah customer:', error);
+        
+        if (error.code === '23505') { // PostgreSQL unique constraint violation
+            return json(
+                { error: 'Code sudah digunakan' },
+                { status: 400 }
+            );
+        }
+        
+        return json(
+            { error: 'Terjadi kesalahan saat menambah customer' },
+            { status: 500 }
+        );
     }
 }; 

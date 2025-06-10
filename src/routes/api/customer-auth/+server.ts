@@ -1,13 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { 
-    getCustomerByCode, 
-    updateCustomerDeviceInfo,
-    logFailedAuth 
-} from '$lib/database/db';
+import { getRow, updateRow, insertRow } from '$lib/config/supabase';
 
 interface Customer {
-    id: number;
+    id: string;
     code: string;
     expire_at: string | null;
     maximum_device: number;
@@ -39,14 +35,14 @@ export const POST: RequestHandler = async ({ request }) => {
     // Validasi input
     if (!code || !device_id) {
         const message = 'Code dan device ID harus diisi';
-        logFailedAuth(
-            code || '', 
-            device_id || null, 
-            device_name || null, 
-            os_version || null, 
-            fingerprint || null, 
+        await insertRow('failed_customer_auth', {
+            code: code || '',
+            device_id: device_id || null,
+            device_name: device_name || null,
+            os_version: os_version || null,
+            fingerprint: fingerprint || null,
             message
-        );
+        });
         return json({ 
             success: false, 
             message 
@@ -54,18 +50,18 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     // Cek kode customer
-    const customer = getCustomerByCode(code) as Customer | undefined;
+    const customer = await getRow('customers', { code }) as Customer | undefined;
     
     if (!customer) {
         const message = 'Code tidak valid';
-        logFailedAuth(
-            code, 
-            device_id, 
-            device_name || null, 
-            os_version || null, 
-            fingerprint || null, 
+        await insertRow('failed_customer_auth', {
+            code,
+            device_id,
+            device_name: device_name || null,
+            os_version: os_version || null,
+            fingerprint: fingerprint || null,
             message
-        );
+        });
         return json({ 
             success: false, 
             message 
@@ -75,14 +71,14 @@ export const POST: RequestHandler = async ({ request }) => {
     // Cek expired
     if (customer.expire_at && new Date(customer.expire_at) < new Date()) {
         const message = 'Code sudah expired';
-        logFailedAuth(
-            code, 
-            device_id, 
-            device_name || null, 
-            os_version || null, 
-            fingerprint || null, 
+        await insertRow('failed_customer_auth', {
+            code,
+            device_id,
+            device_name: device_name || null,
+            os_version: os_version || null,
+            fingerprint: fingerprint || null,
             message
-        );
+        });
         return json({ 
             success: false, 
             message 
@@ -96,13 +92,12 @@ export const POST: RequestHandler = async ({ request }) => {
         // Jika maximum_device 1, device harus sama dengan yang terdaftar
         if (devices.length === 0) {
             // Device pertama, daftarkan dengan informasi lengkap
-            updateCustomerDeviceInfo(
-                customer.id, 
-                JSON.stringify([device_id]),
+            await updateRow('customers', { id: customer.id }, {
+                devices: JSON.stringify([device_id]),
                 device_name,
                 os_version,
                 fingerprint
-            );
+            });
         } else {
             // Cek device ID dan informasi device
             const deviceMatches = devices.includes(device_id);
@@ -116,14 +111,14 @@ export const POST: RequestHandler = async ({ request }) => {
                 const message = !deviceMatches 
                     ? 'Device ID tidak sesuai dengan yang terdaftar'
                     : 'Informasi device tidak sesuai dengan yang terdaftar';
-                logFailedAuth(
-                    code, 
-                    device_id, 
-                    device_name || null, 
-                    os_version || null, 
-                    fingerprint || null, 
+                await insertRow('failed_customer_auth', {
+                    code,
+                    device_id,
+                    device_name: device_name || null,
+                    os_version: os_version || null,
+                    fingerprint: fingerprint || null,
                     message
-                );
+                });
                 return json({ 
                     success: false, 
                     message 
@@ -135,14 +130,14 @@ export const POST: RequestHandler = async ({ request }) => {
         if (!devices.includes(device_id)) {
             if (devices.length >= customer.maximum_device) {
                 const message = 'Jumlah device sudah mencapai batas maksimum';
-                logFailedAuth(
-                    code, 
-                    device_id, 
-                    device_name || null, 
-                    os_version || null, 
-                    fingerprint || null, 
+                await insertRow('failed_customer_auth', {
+                    code,
+                    device_id,
+                    device_name: device_name || null,
+                    os_version: os_version || null,
+                    fingerprint: fingerprint || null,
                     message
-                );
+                });
                 return json({ 
                     success: false, 
                     message 
@@ -150,13 +145,12 @@ export const POST: RequestHandler = async ({ request }) => {
             }
             // Tambahkan device baru dengan informasi lengkap
             devices.push(device_id);
-            updateCustomerDeviceInfo(
-                customer.id,
-                JSON.stringify(devices),
+            await updateRow('customers', { id: customer.id }, {
+                devices: JSON.stringify(devices),
                 device_name,
                 os_version,
                 fingerprint
-            );
+            });
         } else {
             // Device sudah terdaftar, cek informasi device
             const deviceInfoMatches = (
@@ -167,14 +161,14 @@ export const POST: RequestHandler = async ({ request }) => {
 
             if (!deviceInfoMatches) {
                 const message = 'Informasi device tidak sesuai dengan yang terdaftar';
-                logFailedAuth(
-                    code, 
-                    device_id, 
-                    device_name || null, 
-                    os_version || null, 
-                    fingerprint || null, 
+                await insertRow('failed_customer_auth', {
+                    code,
+                    device_id,
+                    device_name: device_name || null,
+                    os_version: os_version || null,
+                    fingerprint: fingerprint || null,
                     message
-                );
+                });
                 return json({ 
                     success: false, 
                     message 

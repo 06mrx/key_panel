@@ -1,8 +1,8 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import db, { getRow } from '$lib/server/database';
+import { getRow } from '$lib/config/supabase';
 
 interface User {
-    id: number;
+    id: string; // Changed to string since Supabase uses UUID
     username: string;
     role: string;
 }
@@ -59,7 +59,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
             } else {
                 try {
-                    const user = getRow('SELECT * FROM users WHERE id = ?', [session]) as User | undefined;
+                    const user = await getRow('users', { id: session }) as User | undefined;
                     
                     if (user) {
                         // Update cache

@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
-import { getRows } from '$lib/server/database';
+import { getRows } from '$lib/config/supabase';
 
 interface Locals {
     user?: {
@@ -15,16 +15,16 @@ export const load: PageServerLoad = async ({ locals }: { locals: Locals }) => {
     }
 
     try {
-        const customers = getRows(`
-            SELECT * FROM customers 
-            ORDER BY created_at DESC
-        `);
+        const customers = await getRows('customers', {});
 
         return {
-            customers
+            customers: customers.map(customer => ({
+                ...customer,
+                devices: customer.devices ? JSON.parse(customer.devices) : []
+            }))
         };
     } catch (err) {
-        console.error('Error fetching customers data:', err);
-        throw error(500, 'Internal Server Error');
+        console.error('Error mengambil data customers:', err);
+        throw error(500, 'Terjadi kesalahan saat mengambil data customers');
     }
 }; 
